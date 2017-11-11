@@ -21,15 +21,18 @@ public class card : MonoBehaviour {
 
     private GameObject _manager;
 
+    private GameObject _ai;
+
 
 
 	// Use this for initialization
 	void Start () {
 
-        _state = 0;
-        StartCoroutine(pause1());
+       // _state = 0;
+        //StartCoroutine(pause1());
         _state = 1;
         _manager = GameObject.FindGameObjectWithTag("Manager");
+        _ai = GameObject.FindGameObjectWithTag("AI");
 		
 	}
 
@@ -44,11 +47,19 @@ public class card : MonoBehaviour {
 
     public void flipcard()
     {
+        //Debug.Log(_manager.GetComponent<GameManager>().turn);
         if (_state == 0)
             _state = 1;
         else if (_state == 1)
             _state = 0;
-        
+
+        if (_manager.GetComponent<GameManager>()._init && _state==1)
+        {
+            //_state = 1;
+            //_ai.GetComponent<AI>().addlist(_cardvalue, gameObject);
+            //Debug.Log("hu");
+        }
+
         if (_state==0 && !DO_NOT)
         {
             GetComponent<Image>().sprite = _cardback;
@@ -57,6 +68,7 @@ public class card : MonoBehaviour {
         {
             GetComponent<Image>().sprite = _cardface;
         }
+
     }
 
     public int cardvalue

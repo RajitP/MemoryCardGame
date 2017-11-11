@@ -11,13 +11,35 @@ public class GameManager : MonoBehaviour {
     public GameObject[] cards;
     public Text matchtext;
 
-    private bool _init = false;
+    public Text pltext;
+    public Text aitext;
+
+    private GameObject _aig;
+
+    public bool _init = false;
     private int _matches = 13;
 
+    //private List<GameObject>[] _mem;
+
+    public bool turn;
+
+    public int ck;
+
+    bool sh = false;
 
 	// Use this for initialization
 	void Start () {
-       // initializecards();
+        // initializecards();
+        /*int i;
+
+        for (i = 0; i < 13; i++)
+        {
+            _mem[i] = new List<GameObject>();
+        }*/
+        turn = false;
+        _aig = GameObject.FindGameObjectWithTag("AI");
+        ck = 0;
+        show();
 
     }
 	
@@ -30,12 +52,38 @@ public class GameManager : MonoBehaviour {
         }
 
         //if(Input.GetTouch(0).phase==TouchPhase.Ended)
-        if(Input.GetMouseButtonUp(0))
+        if(Input.GetMouseButtonUp(0)&& !turn)
         {
+            /*float rand = Random.Range(0, 1.0f);
+            if(rand<0.7f)
+            {
+
+            }*/
+            ck++;
             checkCards();
         }
 		
 	}
+
+    void show()
+    {
+        StartCoroutine(pause());
+    }
+
+    IEnumerator pause()
+    {
+        yield return new WaitForSeconds(1);
+        foreach(GameObject c in cards)
+        {
+            c.GetComponent<card>().flipcard();
+        }
+        yield return new WaitForSeconds(6);
+        foreach (GameObject c in cards)
+        {
+            c.GetComponent<card>().flipcard();
+        }
+        sh = true;
+    }
 
     void initializecards()
     {
@@ -73,19 +121,24 @@ public class GameManager : MonoBehaviour {
 
     public Sprite getCardFace(int i)
     {
-        Debug.Log(i);
+        //Debug.Log(i);
         return cardFace[i-1];
     }
-
-    void checkCards()
+    
+    public void checkCards()
     {
         List<int> c = new List<int>();
 
         for (int i=0;i<cards.Length;i++)
         {
-            if(cards[i].GetComponent<card>().state==1)
+            if(cards[i].GetComponent<card>().state==1 && sh)
             {
                 c.Add(i);
+                foreach(int it in c)
+                {
+                    //Debug.Log(it);
+                }
+                //Debug.Log("#");
             }
         }
         if(c.Count==2)
@@ -94,25 +147,99 @@ public class GameManager : MonoBehaviour {
         }
     }
 
+    public void p_turn()
+    {
+        turn = false;
+        //Debug.Log(ck);
+    }
+
     void cardComparison(List<int> c)
     {
         card.DO_NOT = true;
+        bool del = false;
 
         int x = 0;
-        if(cards[c[0]].GetComponent<card>().cardvalue==cards[c[1]].GetComponent<card>().cardvalue)
+        if (cards[c[0]].GetComponent<card>().cardvalue == cards[c[1]].GetComponent<card>().cardvalue)
         {
             x = 2;
             _matches--;
             matchtext.text = "Number of matches:" + _matches;
-            if(_matches==0)
+            if (_matches == 0)
             {
                 SceneManager.LoadScene("menu");
             }
         }
+        else
+            del = true;
+
         for(int i=0;i < c.Count; i++)
+        {
+            _aig.GetComponent<AI>().addlist(cards[c[i]].GetComponent<card>().cardvalue, cards[c[i]].GetComponent<card>().gameObject);
+            cards[c[i]].GetComponent<card>().state = x;
+            cards[c[i]].GetComponent<card>().falsecheck();
+        }
+
+        if (del)
+        {
+            turn = true;
+            Debug.Log("turn call");
+            _aig.GetComponent<AI>().turn_call();
+        }
+           
+    }
+
+    public void checkCards_ai()
+    {
+        List<int> ca = new List<int>();
+
+        for (int i = 0; i < cards.Length; i++)
+        {
+            if (cards[i].GetComponent<card>().state == 1)
+            {
+                ca.Add(i);
+                foreach (int it in ca)
+                {
+                    //Debug.Log(it);
+                }
+                //Debug.Log("#");
+            }
+        }
+        if (ca.Count == 2)
+        {
+            cardComparison_ai(ca);
+        }
+    }
+
+    void cardComparison_ai(List<int> c)
+    {
+        card.DO_NOT = true;
+        bool del = false;
+
+        int x = 0;
+        if (cards[c[0]].GetComponent<card>().cardvalue == cards[c[1]].GetComponent<card>().cardvalue)
+        {
+            x = 2;
+            _matches--;
+            matchtext.text = "Number of matches:" + _matches;
+            //_aig.GetComponent<AI>().turn_call();
+            if (_matches == 0)
+            {
+                SceneManager.LoadScene("menu");
+            }
+        }
+        else
+            del = true;
+
+        for (int i = 0; i < c.Count; i++)
         {
             cards[c[i]].GetComponent<card>().state = x;
             cards[c[i]].GetComponent<card>().falsecheck();
         }
+
+        if (del)
+            turn = false;
+        else
+            _aig.GetComponent<AI>().turn_call();
+
     }
 }

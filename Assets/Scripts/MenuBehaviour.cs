@@ -5,7 +5,14 @@ using UnityEngine;
 
 public class MenuBehaviour : MonoBehaviour {
 
-	public void triggerMenuBehaviour(int i)
+    GameObject g;
+
+    private void Start()
+    {
+        g = GameObject.FindGameObjectWithTag("EditorOnly");
+    }
+
+    public void triggerMenuBehaviour(int i)
     {
         switch(i)
         {
@@ -16,6 +23,14 @@ public class MenuBehaviour : MonoBehaviour {
                 break;
 
             case (1):
+                SceneManager.LoadScene("level - smart");
+                break;
+
+            case (2):
+                SceneManager.LoadScene("level - genius");
+                break;
+
+            case (3):
                 Application.Quit();
                 break;
         }
